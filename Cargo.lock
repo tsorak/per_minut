@@ -119,10 +119,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "reactor"
+name = "per_minut"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "crossterm",
  "crossterm_progress_bar",
 ]
 
