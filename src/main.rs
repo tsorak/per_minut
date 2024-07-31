@@ -5,7 +5,7 @@ mod buffer;
 mod display;
 mod input;
 
-use buffer::Letters;
+use buffer::{Comparer, Letters, Target};
 use display::Display;
 use input::Input;
 
@@ -13,11 +13,18 @@ fn main() -> anyhow::Result<()> {
     // Enable raw mode
     enable_raw_mode()?;
 
-    let mut letters = Letters::new();
     let mut display = Display::new();
+    let mut letters = Letters::new();
+    let target = Target::new();
+    let mut comparer = Comparer::new();
     let input = Input;
 
-    display.position_cursor(0, 0).clear();
+    display.hide_cursor().position_cursor(0, 0).clear();
+
+    comparer
+        .reset_with(&target.current_as_chars())
+        .compare(&letters)
+        .print_colored();
 
     loop {
         display.position_cursor(0, 0);
@@ -30,7 +37,7 @@ fn main() -> anyhow::Result<()> {
                 }
                 "ctrl+c" => {
                     display.clear().println("Goodbye");
-                    disable_raw_mode()?;
+                    exit();
                     break;
                 }
                 "ctrl+w" => letters.pop_word(),
@@ -41,8 +48,10 @@ fn main() -> anyhow::Result<()> {
             }
         }
 
+        comparer.compare(&letters);
+
         display.clear();
-        letters.print();
+        comparer.print_colored();
 
         //TODO: move cursor to end. (using line_index and somehow current line length)
 
@@ -51,7 +60,15 @@ fn main() -> anyhow::Result<()> {
     }
 
     // Disable raw mode before exiting
-    disable_raw_mode()?;
+    exit();
 
     Ok(())
+}
+
+fn exit() {
+    use crossterm::{cursor, execute};
+    use std::io::stdout;
+
+    let _ = execute!(stdout(), cursor::Show);
+    let _ = disable_raw_mode();
 }

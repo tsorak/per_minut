@@ -2,7 +2,7 @@ use core::fmt;
 use std::io::{stdout, Stdout};
 
 use crossterm::{
-    cursor::{MoveDown, MoveLeft, MoveRight, MoveTo, MoveUp},
+    cursor::{Hide, MoveDown, MoveLeft, MoveRight, MoveTo, MoveUp, Show},
     execute,
     terminal::{Clear, ClearType},
 };
@@ -42,6 +42,16 @@ impl Display {
             Some(y) if y.lt(&0) => execute!(self.0, MoveDown(-y as u16)).unwrap(),
             _ => (),
         }
+        self
+    }
+
+    pub fn hide_cursor(&mut self) -> &mut Self {
+        execute!(self.0, Hide).unwrap();
+        self
+    }
+
+    pub fn show_cursor(&mut self) -> &mut Self {
+        execute!(self.0, Show).unwrap();
         self
     }
 }
