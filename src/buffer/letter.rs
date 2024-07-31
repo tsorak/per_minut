@@ -30,7 +30,16 @@ impl Letters {
     }
 
     pub fn pop_word(&mut self) {
-        let space = self.inner.iter().rposition(|s| s == " ");
+        let space = {
+            let mut parts = self.inner.iter();
+
+            // if the last character is a space, select the one before it.
+            if parts.next_back() == Some(&" ".to_string()) {
+                parts.rposition(|s| s == " ")
+            } else {
+                self.inner.iter().rposition(|s| s == " ")
+            }
+        };
         let newline = self.inner.iter().rposition(|s| s == "\n\r");
 
         match (space, newline) {
@@ -39,11 +48,11 @@ impl Letters {
                 if newline > space {
                     self.inner = self.inner.clone().into_iter().take(newline).collect();
                 } else {
-                    self.inner = self.inner.clone().into_iter().take(space).collect();
+                    self.inner = self.inner.clone().into_iter().take(space + 1).collect();
                 }
             }
             (Some(space), None) => {
-                self.inner = self.inner.clone().into_iter().take(space).collect();
+                self.inner = self.inner.clone().into_iter().take(space + 1).collect();
             }
             (None, Some(newline)) => {
                 self.inner = self.inner.clone().into_iter().take(newline).collect();
